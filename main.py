@@ -1,9 +1,15 @@
 import pandas as pd
 import numpy as np
 
+from matplotlib import pyplot as plt
+
+from plotting.plott import plotting_age_survivers, plotting_class_survivers
+
+
 data = pd.read_csv('train_and_test2.csv')
 
 X = data[['Age', 'Fare', 'Sex', 'sibsp', 'Parch', 'Pclass']].values
+X_graph = data[['Age', 'Pclass', '2urvived']]
 Y = data['2urvived'].values
 
 
@@ -41,3 +47,8 @@ model = logreg(X, Y)
 predictions = predict(model, X)
 
 print('acc: ', (predictions == Y).mean())
+
+plotting_age_survivers(X_graph)
+plotting_class_survivers(X_graph)
+
+plt.show()
