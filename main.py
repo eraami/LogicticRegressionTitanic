@@ -1,8 +1,9 @@
 import pandas as pd
 import numpy as np
 
-from matplotlib import pyplot as plt
+from sklearn import linear_model
 
+from matplotlib import pyplot as plt
 from plotting.plott import plotting_age_survivers, plotting_class_survivers
 
 
@@ -13,29 +14,30 @@ X_graph = data[['Age', 'Pclass', '2urvived']]
 Y = data['2urvived'].values
 
 
-def logreg(X, Y, learning_rate=0.01, epoches=10000):
+def logreg(X, Y, learning_rate=0.001, epoches=10000):
     slopes = np.random.randn(X.shape[1])
     intercept = np.random.randn()
 
+    BATCH_SIZE = 16
+    BATCH_INDEXES = np.array(np.arange(len(X)))
+
     for _ in range(epoches):
-
-        i = np.random.randint(0, len(X))
-        x = X[i]
-        y = Y[i]
-
+        np.random.shuffle(BATCH_INDEXES)
+        x = X[BATCH_INDEXES[:BATCH_SIZE]]
+        y = Y[BATCH_INDEXES[:BATCH_SIZE]]
         z = x @ slopes + intercept
         predict = 1 / (1 + np.exp(-z))
-
         error = predict - y
-        slopes -= x * error * learning_rate
-        intercept -= error * learning_rate
+        gradient_slope = 1 / BATCH_SIZE * x.T @ error
+        gradient_intercept = error.mean()
+        slopes -= gradient_slope * learning_rate
+        intercept -= gradient_intercept * learning_rate
 
     return slopes, intercept
 
 def predict(model, X):
     slopes = model[0]
     intercept = model[1]
-
     z = X @ slopes + intercept
     raw_predictions = 1 / (1 + np.exp(-z))
     predictions = (raw_predictions > 0.5).astype(int)
@@ -45,10 +47,16 @@ def predict(model, X):
 model = logreg(X, Y)
 
 predictions = predict(model, X)
+sk_model = linear_model.LogisticRegression()
+sk_model.fit(X, Y)
+sk_predictions = sk_model.predict(X)
 
-print('acc: ', (predictions == Y).mean())
+print('my acc: ', (predictions == Y).mean())
+print('sk acc: ', (sk_predictions == Y).mean())
+print('my/sk acc: ', (predictions == sk_predictions).mean())
+#
+# plotting_age_survivers(X_graph)
+# plt.show()
+# plotting_class_survivers(X_graph)
+# plt.show()
 
-plotting_age_survivers(X_graph)
-plotting_class_survivers(X_graph)
-
-plt.show()
