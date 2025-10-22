@@ -13,6 +13,14 @@ X = data[['Age', 'Fare', 'Sex', 'sibsp', 'Parch', 'Pclass']].values
 X_graph = data[['Age', 'Pclass', '2urvived']]
 Y = data['2urvived'].values
 
+age = X[:, 0]
+X[:, 0] = (age - age.min()) / (age.max() -  age.min())
+
+fare = X[:, 1]
+X[:, 1] = (fare - fare.min()) / (fare.max() -  fare.min())
+
+plt.scatter(X_graph['Age'], X[:, 1])
+plt.show()
 
 def logreg(X, Y, learning_rate=0.001, epoches=10000):
     slopes = np.random.randn(X.shape[1])
